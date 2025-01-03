@@ -10,6 +10,7 @@ import ru.practicum.explore.dto.Stats;
 import ru.practicum.explore.mapper.HitMapper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -26,27 +27,41 @@ public class HitServiceImpl implements HitService {
     }
 
     public List<Stats> getStats(String start, String end, String[] uris, Boolean unique) {
-        if (unique) {
-            List<Stats> stats = new ArrayList<>();
-            for (int i = 0; i < uris.length; i++) {
-                String cleanUri = uris[i].replace("\"", "");
-                String cleanStart = start.replace("\"", "");
-                String cleanEnd = end.replace("\"", "");
-                Integer count = hitRepository.searchUniqueHits(cleanStart, cleanEnd, cleanUri);
-                stats.add(new Stats("ewm-main-service", cleanUri, count));
-            }
-            return stats;
-        } else {
-            List<Stats> stats = new ArrayList<>();
-            for (int i = 0; i < uris.length; i++) {
-                String cleanUri = uris[i].replace("\"", "");
-                String cleanStart = start.replace("\"", "");
-                String cleanEnd = end.replace("\"", "");
-                Integer count = hitRepository.searchHits(cleanStart, cleanEnd, cleanUri);
-                stats.add(new Stats("ewm-main-service", cleanUri, count));
-            }
-            return stats;
-        }
+        String cleanStart = start.replace("\"", "");
+        String cleanEnd = end.replace("\"", "");
+        List<Stats> stats = new ArrayList<>();
+        if (uris != null) {
+            List<String> cleanUris = Arrays.stream(uris).map(uri -> uri.replace("\"", "")).toList();
+            if (unique) {
+                cleanUris.forEach(cleanUri -> {
+                    Integer count = hitRepository.searchUniqueHits(cleanStart, cleanEnd, cleanUri);
+                    stats.add(new Stats("ewm-main-service", cleanUri, count));
+                });
+                return stats;
 
+            } else {
+                cleanUris.forEach(cleanUri -> {
+                    Integer count = hitRepository.searchHits(cleanStart, cleanEnd, cleanUri);
+                    stats.add(new Stats("ewm-main-service", cleanUri, count));
+                });
+                return stats;
+            }
+
+        } else {
+            List<String> newUris = hitRepository.searchUniqueUris(cleanStart, cleanEnd);
+            if (unique) {
+                newUris.forEach(cleanUri -> {
+                    Integer count = hitRepository.searchUniqueHits(cleanStart, cleanEnd, cleanUri);
+                    stats.add(new Stats("ewm-main-service", cleanUri, count));
+                });
+                return stats;
+            } else {
+                newUris.forEach(cleanUri -> {
+                    Integer count = hitRepository.searchHits(cleanStart, cleanEnd, cleanUri);
+                    stats.add(new Stats("ewm-main-service", cleanUri, count));
+                });
+                return stats;
+            }
+        }
     }
 }

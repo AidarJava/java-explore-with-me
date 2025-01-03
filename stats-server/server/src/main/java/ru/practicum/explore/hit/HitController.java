@@ -24,8 +24,8 @@ public class HitController {
     @GetMapping("/stats")
     public List<Stats> getStats(@RequestParam(name = "start") String start,
                                 @RequestParam(name = "end") String end,
-                                @RequestParam(name = "uris") String[] uris,
-                                @RequestParam(name = "unique") Boolean unique) {
+                                @RequestParam(name = "uris", required = false) String[] uris,
+                                @RequestParam(name = "unique", defaultValue = "false", required = false) Boolean unique) {
         log.info("GET/ Проверка параметров запроса метода getStats, start - {}, end - {}, uris - {}, unique - {}", start, end, uris, unique);
         return hitService.getStats(start, end, uris, unique);
     }
