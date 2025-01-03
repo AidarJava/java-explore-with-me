@@ -11,6 +11,7 @@ import ru.practicum.explore.mapper.HitMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -37,6 +38,7 @@ public class HitServiceImpl implements HitService {
                     Integer count = hitRepository.searchUniqueHits(cleanStart, cleanEnd, cleanUri);
                     stats.add(new Stats("ewm-main-service", cleanUri, count));
                 });
+                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
                 return stats;
 
             } else {
@@ -44,6 +46,7 @@ public class HitServiceImpl implements HitService {
                     Integer count = hitRepository.searchHits(cleanStart, cleanEnd, cleanUri);
                     stats.add(new Stats("ewm-main-service", cleanUri, count));
                 });
+                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
                 return stats;
             }
 
@@ -54,12 +57,14 @@ public class HitServiceImpl implements HitService {
                     Integer count = hitRepository.searchUniqueHits(cleanStart, cleanEnd, cleanUri);
                     stats.add(new Stats("ewm-main-service", cleanUri, count));
                 });
+                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
                 return stats;
             } else {
                 newUris.forEach(cleanUri -> {
                     Integer count = hitRepository.searchHits(cleanStart, cleanEnd, cleanUri);
                     stats.add(new Stats("ewm-main-service", cleanUri, count));
                 });
+                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
                 return stats;
             }
         }

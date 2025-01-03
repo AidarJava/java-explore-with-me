@@ -1,19 +1,19 @@
 services:
-  stats-server-client:
-    build: stats-server/client
+  client:
+    build: stats-service/client
     image: client
     container_name: client
     ports:
       - "8080:8080"
     depends_on:
-      - server
+      - stats-server
     environment:
-      - SERVER_URL=http://server:9090
+      - SERVER_URL=http://stats-server:9090
 
-  server:
-    build: stats-server/server
-    image: server
-    container_name: server
+  stats-server:
+    build: stats-service/stats-server
+    image: stats-server
+    container_name: stats-server
     ports:
       - "9090:9090"
     depends_on:
