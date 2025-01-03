@@ -15,10 +15,10 @@ import ru.practicum.explore.dto.HitDtoOut;
 @RestController
 @Slf4j
 @RequestMapping("/events")
-public class HitClientController {
+public class HitGatewayController {
     private final WebClient webClient;
 
-    public HitClientController(WebClient.Builder webClientBuilder, @Value("${server.url}") String serverUrl) {
+    public HitGatewayController(WebClient.Builder webClientBuilder, @Value("${server.url}") String serverUrl) {
         this.webClient = webClientBuilder.baseUrl(serverUrl)
                 .filter((request, next) -> next.exchange(request)
                         .flatMap(response -> {

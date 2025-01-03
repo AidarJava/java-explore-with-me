@@ -5,6 +5,8 @@ import ru.practicum.explore.dto.HitDtoIn;
 import ru.practicum.explore.dto.HitDtoOut;
 import ru.practicum.explore.dto.Hit;
 
+import java.time.format.DateTimeFormatter;
+
 @Component
 public class HitMapper {
     public HitDtoOut mapRecordToRecordDtoOut(Hit hit) {
@@ -13,7 +15,7 @@ public class HitMapper {
         hitDtoOut.setApp(hit.getApp());
         hitDtoOut.setUri(hit.getUri());
         hitDtoOut.setIp(hit.getIp());
-        hitDtoOut.setTimestamp(hit.getTimestamp());
+        hitDtoOut.setTimestamp(hit.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return hitDtoOut;
     }
 

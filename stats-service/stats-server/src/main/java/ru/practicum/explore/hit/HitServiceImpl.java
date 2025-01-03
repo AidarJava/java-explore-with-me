@@ -9,6 +9,8 @@ import ru.practicum.explore.dto.HitDtoOut;
 import ru.practicum.explore.dto.Stats;
 import ru.practicum.explore.mapper.HitMapper;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -28,45 +30,41 @@ public class HitServiceImpl implements HitService {
     }
 
     public List<Stats> getStats(String start, String end, String[] uris, Boolean unique) {
-        String cleanStart = start.replace("\"", "");
-        String cleanEnd = end.replace("\"", "");
+        LocalDateTime cleanStart = LocalDateTime.parse(start.replace("\"", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTime cleanEnd = LocalDateTime.parse(end.replace("\"", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         List<Stats> stats = new ArrayList<>();
         if (uris != null) {
             List<String> cleanUris = Arrays.stream(uris).map(uri -> uri.replace("\"", "")).toList();
             if (unique) {
-                cleanUris.forEach(cleanUri -> {
-                    Integer count = hitRepository.searchUniqueHits(cleanStart, cleanEnd, cleanUri);
-                    stats.add(new Stats("ewm-main-service", cleanUri, count));
-                });
-                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
-                return stats;
-
+                return searchUniqueHits(cleanUris, cleanStart, cleanEnd, stats);
             } else {
-                cleanUris.forEach(cleanUri -> {
-                    Integer count = hitRepository.searchHits(cleanStart, cleanEnd, cleanUri);
-                    stats.add(new Stats("ewm-main-service", cleanUri, count));
-                });
-                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
-                return stats;
+                return searchHits(cleanUris, cleanStart, cleanEnd, stats);
             }
-
         } else {
             List<String> newUris = hitRepository.searchUniqueUris(cleanStart, cleanEnd);
             if (unique) {
-                newUris.forEach(cleanUri -> {
-                    Integer count = hitRepository.searchUniqueHits(cleanStart, cleanEnd, cleanUri);
-                    stats.add(new Stats("ewm-main-service", cleanUri, count));
-                });
-                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
-                return stats;
+                return searchUniqueHits(newUris, cleanStart, cleanEnd, stats);
             } else {
-                newUris.forEach(cleanUri -> {
-                    Integer count = hitRepository.searchHits(cleanStart, cleanEnd, cleanUri);
-                    stats.add(new Stats("ewm-main-service", cleanUri, count));
-                });
-                stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
-                return stats;
+                return searchHits(newUris, cleanStart, cleanEnd, stats);
             }
         }
+    }
+
+    public List<Stats> searchUniqueHits(List<String> uris, LocalDateTime start, LocalDateTime end, List<Stats> stats) {
+        uris.forEach(cleanUri -> {
+            Integer count = hitRepository.searchUniqueHits(start, end, cleanUri);
+            stats.add(new Stats("ewm-main-service", cleanUri, count));
+        });
+        stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
+        return stats;
+    }
+
+    public List<Stats> searchHits(List<String> uris, LocalDateTime start, LocalDateTime end, List<Stats> stats) {
+        uris.forEach(cleanUri -> {
+            Integer count = hitRepository.searchHits(start, end, cleanUri);
+            stats.add(new Stats("ewm-main-service", cleanUri, count));
+        });
+        stats.sort(Comparator.comparingInt(Stats::getHits).reversed());
+        return stats;
     }
 }
