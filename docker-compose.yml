@@ -1,14 +1,40 @@
 services:
+  client:
+    build: stats-service/client
+    image: client
+    container_name: client
+    ports:
+      - "8080:8080"
+    depends_on:
+      - stats-server
+    environment:
+      - SERVER_URL=http://stats-server:9090
+
   stats-server:
+    build: stats-service/stats-server
+    image: stats-server
+    container_name: stats-server
     ports:
       - "9090:9090"
+    depends_on:
+      - stats-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/explore
+      - SPRING_DATASOURCE_USERNAME=explore
+      - SPRING_DATASOURCE_PASSWORD=explore
 
   stats-db:
     image: postgres:16.1
-
-  ewm-service:
+    container_name: postgres
     ports:
-      - "8080:8080"
+      - "6541:5432"
+    environment:
+      - POSTGRES_PASSWORD=explore
+      - POSTGRES_USER=explore
+      - POSTGRES_DB=explore
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
 
-  ewm-db:
-    image: postgres:16.1
