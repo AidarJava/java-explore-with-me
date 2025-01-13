@@ -132,15 +132,15 @@ public class EventServiceImpl implements EventService {
         }
         //делаем выборку по списоку id категорий и id пользователей
         List<Integer> nextIds = List.of();
-        if (categories != null & !ids.isEmpty()) {
+        if (categories != null && !ids.isEmpty()) {
             nextIds = eventRepository.getAdminEventsByIdsAndCategory(ids, categories).stream().map(Event::getId).toList();
-        } else if (categories != null & ids.isEmpty()) {
+        } else if (categories != null && ids.isEmpty()) {
             nextIds = eventRepository.getAdminEventsByCategory(categories).stream().map(Event::getId).toList();
-        } else if (categories == null & !ids.isEmpty()) {
+        } else if (categories == null && !ids.isEmpty()) {
             nextIds = eventRepository.getAdminEventsByIds(ids).stream().map(Event::getId).toList();
         }
 
-        if ((categories != null || !ids.isEmpty()) & nextIds.isEmpty()) { //ничего не нашли
+        if ((categories != null || !ids.isEmpty()) && nextIds.isEmpty()) { //ничего не нашли
             return new ArrayList<>();
         }
 
@@ -159,28 +159,28 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        if (states != null & stepThreeIds.isEmpty()) { //ничего не нашли
+        if (states != null && stepThreeIds.isEmpty()) { //ничего не нашли
             return new ArrayList<>();
         }
 
         //делаем выборку по датам
         List<Event> events;
         if (stepThreeIds.isEmpty()) {
-            if (rangeStart != null & rangeEnd != null) {
+            if (rangeStart != null && rangeEnd != null) {
                 events = eventRepository.getAdminEventByStartAndEnd(parseDate(rangeStart), parseDate(rangeEnd), from, size);
-            } else if (rangeStart != null & rangeEnd == null) {
+            } else if (rangeStart != null && rangeEnd == null) {
                 events = eventRepository.getAdminEventByStart(parseDate(rangeStart), from, size);
-            } else if (rangeStart == null & rangeEnd != null) {
+            } else if (rangeStart == null && rangeEnd != null) {
                 events = eventRepository.getAdminEventByEnd(parseDate(rangeEnd), from, size);
             } else {
                 events = eventRepository.getAdminEvent(from, size);
             }
         } else {
-            if (rangeStart != null & rangeEnd != null) {
+            if (rangeStart != null && rangeEnd != null) {
                 events = eventRepository.getAdminEventInIdsByStartAndEnd(stepThreeIds, parseDate(rangeStart), parseDate(rangeEnd), from, size);
-            } else if (rangeStart != null & rangeEnd == null) {
+            } else if (rangeStart != null && rangeEnd == null) {
                 events = eventRepository.getAdminEventInIdsByStart(stepThreeIds, parseDate(rangeStart), from, size);
-            } else if (rangeStart == null & rangeEnd != null) {
+            } else if (rangeStart == null && rangeEnd != null) {
                 events = eventRepository.getAdminEventInIdsByEnd(stepThreeIds, parseDate(rangeEnd), from, size);
             } else {
                 events = eventRepository.getAdminEventInIds(stepThreeIds, from, size);
