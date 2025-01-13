@@ -223,7 +223,7 @@ public class EventServiceImpl implements EventService {
     }
 
     public void checkValidTime(LocalDateTime time) {
-        if (!LocalDateTime.now().plusHours(2).isAfter(time)) {
+        if (LocalDateTime.now().plusHours(2).isAfter(time)) {
             throw new ForbiddenException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента, EventDate - " + time);
         }
     }
