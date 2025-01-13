@@ -11,6 +11,9 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import ru.practicum.explore.dto.HitDtoIn;
 import ru.practicum.explore.dto.HitDtoOut;
+import ru.practicum.explore.dto.Stats;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -43,12 +46,28 @@ public class HitGatewayController {
     }
 
     @PostMapping("/{id}")
-    public Mono<ResponseEntity<HitDtoOut>> addRecordWithId(@Positive @PathVariable(name = "id") Long id,
+    public Mono<ResponseEntity<HitDtoOut>> addRecordWithId(@Positive @PathVariable(name = "id") Integer id,
                                                            HttpServletRequest request) {
         log.info("POST/ Проверка параметров запроса метода addRecordWithId, URI - {}, IP - {}", request.getRequestURI(), request.getRemoteAddr());
         return webClient.post()
                 .uri("/hit")
                 .bodyValue(new HitDtoIn("ewm-main-service", request.getRequestURI(), request.getRemoteAddr()))
                 .exchangeToMono(response -> response.toEntity(HitDtoOut.class));
+    }
+
+    @GetMapping("/stats")
+    public Mono<ResponseEntity<List<Stats>>> getHits(@RequestParam(name = "start") String start,
+                                                     @RequestParam(name = "end") String end,
+                                                     @RequestParam(name = "uris", required = false) String[] uris,
+                                                     @RequestParam(name = "unique", defaultValue = "false", required = false) Boolean unique) {
+        log.info("GET/ Проверка параметров запроса метода getHits, start - {}, end - {}, uris - {}, unique - {}", start, end, uris, unique);
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/stats")
+                        .queryParam("start", start)
+                        .queryParam("end", end)
+                        .queryParam("uris", uris)
+                        .queryParam("unique", unique)
+                        .build())
+                .exchangeToMono(response -> response.toEntityList(Stats.class));
     }
 }

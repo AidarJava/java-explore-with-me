@@ -4,11 +4,11 @@ services:
     image: client
     container_name: client
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       - stats-server
     environment:
-      - SERVER_URL=http://stats-server:9090
+      - CLIENT_URL=http://stats-server:9090
 
   stats-server:
     build: stats-service/stats-server
@@ -38,3 +38,32 @@ services:
       interval: 5s
       retries: 10
 
+  ewm-db:
+    image: postgres:16.1
+    container_name: postgresEvm
+    ports:
+      - "6543:5432"
+    environment:
+      - POSTGRES_PASSWORD=exploreEvm
+      - POSTGRES_USER=exploreEvm
+      - POSTGRES_DB=exploreEvm
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  ewm-service:
+    build: ewm-service
+    image: ewm-service
+    container_name: ewm-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ewm-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresEvm:5432/exploreEvm
+      - SPRING_DATASOURCE_USERNAME=exploreEvm
+      - SPRING_DATASOURCE_PASSWORD=exploreEvm
+      - GATEWAY_URL=http://client:8080
+      - SERVER_URL=http://ewm-service:8080

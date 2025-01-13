@@ -1,14 +1,12 @@
 package ru.practicum.explore.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Setter
 @Slf4j
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class Stats {
