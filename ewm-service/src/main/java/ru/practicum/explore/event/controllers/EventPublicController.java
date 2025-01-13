@@ -16,7 +16,6 @@ import java.util.List;
 @RequestMapping("/events")
 public class EventPublicController {
     private final EventService eventService;
-    private final EventClient eventClient;
 
     @GetMapping
     public List<EventShortDtoOut> getPublicEvent(@RequestParam(name = "text", defaultValue = "_") String text,
@@ -30,14 +29,12 @@ public class EventPublicController {
                                                  @RequestParam(name = "size", defaultValue = "10") Integer size, HttpServletRequest request) {
         log.info("GET/ Проверка параметров запроса метода getPublicEvent, text - {}, categories - {}, paid - {}, rangeStart - {}" +
                 ", rangeEnd - {}, onlyAvailable - {}, sort - {}, from - {}, size - {}", text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
-        eventClient.sendHit();
         return eventService.getPublicEvent(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
     }
 
     @GetMapping("/{id}")
     public EventDtoOut getPublicEventById(@PathVariable(name = "id") Integer eventId, HttpServletRequest request) {
         log.info("GET/ Проверка параметров запроса метода getPublicEventById, id - {}", eventId);
-        eventClient.sendHitId(eventId);
         return eventService.getPublicEventById(eventId);
     }
 

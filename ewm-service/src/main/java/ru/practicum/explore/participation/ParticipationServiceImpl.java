@@ -42,7 +42,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     public ParticipationUpdateDtoOut updateEventRequests(Integer userId, Integer eventId, ParticipationUpdateDtoIn participationUpdateDtoIn) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
         Integer number = participationRepository.countByEvent(eventId);
-        if (event.getParticipantLimit() <= number) {
+        if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= number) {
             throw new ConflictException("Достигнут лимит по заявкам на данное событие!");
         }
         if (participationRepository.countBadReq(participationUpdateDtoIn.getRequestIds()) > 0) {
@@ -92,7 +92,7 @@ public class ParticipationServiceImpl implements ParticipationService {
             throw new ConflictException("Нельзя участвовать в неопубликованном событии!");
         }
         Integer number = participationRepository.countByEvent(eventId);
-        if (event.getParticipantLimit() <= number) {
+        if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= number) {
             throw new ConflictException("Достигнут лимит по заявкам на данное событие!");
         }
         Participation participation = new Participation();

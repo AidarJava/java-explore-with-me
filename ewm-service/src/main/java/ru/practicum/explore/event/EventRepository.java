@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
-    @Query(value = "SELECT * FROM events AS e WHERE e.initiator :userId OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.initiator = :userId OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEvents(@Param("userId") Integer userId, @Param("from") Integer from, @Param("size") Integer size);
 
-    Optional<Event> findByIdAndInitiator(Integer eventId, Integer userId);
+    Event findByIdAndInitiator(Integer eventId, Integer userId);
+
+    @Query("select e from Event as e where e.id = ?1 AND e.state = 'PUBLISHED'")
+    Optional<Event> getPublicEventById(Integer eventId);
 
     @Query(value = "SELECT * FROM events AS e WHERE (e.annotation LIKE CONCAT('%', :lowText, '%') OR e.description LIKE CONCAT('%', :lowText, '%')) AND e.paid = :paid " +
             "AND e.event_date > :rangeStart AND e.event_date < :rangeEnd AND e.state = 'PUBLISHED'", nativeQuery = true)

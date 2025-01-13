@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.event.controllers.EventClient;
 import ru.practicum.explore.event.dto.EventDtoIn;
 import ru.practicum.explore.event.dto.EventDtoOut;
 import ru.practicum.explore.event.dto.EventMapper;
@@ -26,6 +27,7 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
+    private final EventClient eventClient;
 
     @Transactional
     @Override
@@ -33,12 +35,6 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.mapEventDtoInToEvent(eventDtoIn);
         checkValidTime(event.getEventDate());
         event.setInitiator(userId);
-        if (!eventDtoIn.getRequestModeration()) {
-            event.setState("PUBLISHED");
-            event.setPublishedOn(LocalDateTime.now());
-        } else {
-            event.setState("PENDING");
-        }
         return eventMapper.mapEventToEventDtoOut(eventRepository.save(event));
     }
 
@@ -50,15 +46,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDtoOut getFullEvent(Integer userId, Integer eventId) {
-        return eventMapper.mapEventToEventDtoOut(eventRepository.findByIdAndInitiator(eventId, userId)
-                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found")));
+        checkEvent(eventId);
+        return eventMapper.mapEventToEventDtoOut(eventRepository.findByIdAndInitiator(eventId, userId));
     }
 
     @Transactional
     @Override
     public EventDtoOut updateEvent(Integer userId, Integer eventId, EventDtoIn eventDtoIn) {
-        Event event = eventRepository.findByIdAndInitiator(eventId, userId)
-                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+        checkEvent(eventId);
+        Event event = eventRepository.findByIdAndInitiator(eventId, userId);
         if (event.getState().equals("PUBLISHED")) {
             throw new BadRequestException("Event must not be published");
         } else if (!event.getState().equals("PENDING") && !event.getState().equals("CANCELED")) {
@@ -76,6 +72,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDtoOut> getPublicEvent(String text, Integer[] categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size) {
+        eventClient.sendHit();
         String lowText = text.toLowerCase();
         lowText = lowText.replace("\"", "");
         List<Event> events;
@@ -119,13 +116,16 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDtoOut getPublicEventById(Integer eventId) {
-        return eventMapper.mapEventToEventDtoOut(eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found")));
+        Event event = eventRepository.getPublicEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+        if (event.getState().equals("PUBLISHED")) {
+            eventClient.sendHitId(eventId);
+        }
+        return eventMapper.mapEventToEventDtoOut(event);
     }
 
     @Override
     public List<EventDtoOut> getAdminEvent(Integer[] users, String[] states, Integer[] categories, String rangeStart, String rangeEnd, Integer from, Integer size) {
-
         List<Integer> ids = List.of();
         if (users != null) {
             ids = List.of(users);
@@ -193,8 +193,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventDtoOut updateAdminEvent(Integer eventId, EventDtoIn eventDtoIn) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+        Event event = getEvent(eventId);
         LocalDateTime date = parseDate(eventDtoIn.getEventDate());
         if (!date.isAfter(LocalDateTime.now().plusHours(1))) {
             throw new BadRequestException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
@@ -224,9 +223,19 @@ public class EventServiceImpl implements EventService {
     }
 
     public void checkValidTime(LocalDateTime time) {
-        if (time.isBefore(LocalDateTime.now().plusHours(2))) {
+        if (!LocalDateTime.now().plusHours(2).isAfter(time)) {
             throw new ForbiddenException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента, EventDate - " + time);
         }
+    }
+
+    public void checkEvent(Integer eventId) {
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+    }
+
+    public Event getEvent(Integer eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
     }
 
     public LocalDateTime parseDate(String date) {

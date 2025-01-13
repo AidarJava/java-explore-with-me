@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
 import ru.practicum.explore.location.model.Location;
@@ -13,6 +14,7 @@ import ru.practicum.explore.location.model.Location;
 @Slf4j
 @Getter
 @Setter
+@ToString
 public class EventDtoIn {
     @NotBlank
     @Length(min = 20, max = 2000)

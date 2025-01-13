@@ -27,7 +27,6 @@ public class HitController {
                                 @RequestParam(name = "uris", required = false) String[] uris,
                                 @RequestParam(name = "unique", defaultValue = "false", required = false) Boolean unique) {
         log.info("GET/ Проверка параметров запроса метода getStats, start - {}, end - {}, uris - {}, unique - {}", start, end, uris, unique);
-        System.out.println(hitService.getStats(start, end, uris, unique));
         return hitService.getStats(start, end, uris, unique);
     }
 

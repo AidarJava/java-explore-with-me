@@ -28,9 +28,22 @@ public class EventMapper {
         event.setEventDate(LocalDateTime.parse(eventDtoIn.getEventDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         event.setLocationLat(eventDtoIn.getLocation().getLat());
         event.setLocationLon(eventDtoIn.getLocation().getLon());
-        event.setPaid(eventDtoIn.getPaid());
-        event.setParticipantLimit(eventDtoIn.getParticipantLimit());
-        event.setRequestModeration(eventDtoIn.getRequestModeration());
+        if (eventDtoIn.getPaid() == null) {
+            event.setPaid(false);
+        } else {
+            event.setPaid(eventDtoIn.getPaid());
+        }
+        if (eventDtoIn.getParticipantLimit() == null) {
+            event.setParticipantLimit(0);
+        } else {
+            event.setParticipantLimit(eventDtoIn.getParticipantLimit());
+        }
+        if (!eventDtoIn.getRequestModeration()) {
+            event.setState("PUBLISHED");
+            event.setPublishedOn(LocalDateTime.now());
+        } else {
+            event.setState("PENDING");
+        }
         event.setTitle(eventDtoIn.getTitle());
         return event;
     }
@@ -57,7 +70,7 @@ public class EventMapper {
         eventDtoOut.setRequestModeration(event.getRequestModeration());
         eventDtoOut.setState(event.getState());
         eventDtoOut.setTitle(event.getTitle());
-        String start = eventDtoOut.getPublishedOn();
+        String start = eventDtoOut.getEventDate();
         String end = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String[] uris = {"/events/" + event.getId()};
         eventDtoOut.setViews(eventClient.getHits(start, end, uris, false).getFirst().getHits());
@@ -74,7 +87,7 @@ public class EventMapper {
         eventShortDtoOut.setInitiator(userService.getUser(event.getInitiator()));
         eventShortDtoOut.setPaid(event.getPaid());
         eventShortDtoOut.setTitle(event.getTitle());
-        String start = event.getPublishedOn().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String start = event.getEventDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String end = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String[] uris = {"/events/" + event.getId()};
         eventShortDtoOut.setViews(eventClient.getHits(start, end, uris, false).getFirst().getHits());
