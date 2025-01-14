@@ -39,7 +39,7 @@ public class EventMapper {
             event.setParticipantLimit(eventDtoIn.getParticipantLimit());
         }
 
-        if (!eventDtoIn.getRequestModeration()) {
+        if (eventDtoIn.getRequestModeration() != null && !eventDtoIn.getRequestModeration()) {
             event.setState("PUBLISHED");
             event.setPublishedOn(LocalDateTime.now());
             event.setRequestModeration(false);

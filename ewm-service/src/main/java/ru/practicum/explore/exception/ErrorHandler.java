@@ -66,9 +66,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(SQLException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse sqlException(SQLException e) {
-        log.error("Ошибка 400 {}", e.getMessage());
+        log.error("Ошибка 409 {}", e.getMessage());
         return new ErrorResponse("BAD_REQUEST", "Incorrectly made request.", e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }

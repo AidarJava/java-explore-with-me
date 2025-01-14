@@ -3,6 +3,7 @@ package ru.practicum.explore.event;
 import ru.practicum.explore.event.dto.EventDtoIn;
 import ru.practicum.explore.event.dto.EventDtoOut;
 import ru.practicum.explore.event.dto.EventShortDtoOut;
+import ru.practicum.explore.event.dto.EventUpdateDtoIn;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface EventService {
 
     EventDtoOut getFullEvent(Integer userId, Integer eventId);
 
-    EventDtoOut updateEvent(Integer userId, Integer eventId, EventDtoIn eventDtoIn);
+    EventDtoOut updateEvent(Integer userId, Integer eventId, EventUpdateDtoIn eventDtoIn);
 
     List<EventShortDtoOut> getPublicEvent(String text, Integer[] categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size);
 
@@ -21,7 +22,7 @@ public interface EventService {
 
     List<EventDtoOut> getAdminEvent(Integer[] users, String[] states, Integer[] categories, String rangeStart, String rangeEnd, Integer from, Integer size);
 
-    EventDtoOut updateAdminEvent(Integer eventId, EventDtoIn eventDtoIn);
+    EventDtoOut updateAdminEvent(Integer eventId, EventUpdateDtoIn eventDtoIn);
 
     List<EventShortDtoOut> getCompilationsEvents(List<Integer> eventIds);
 }

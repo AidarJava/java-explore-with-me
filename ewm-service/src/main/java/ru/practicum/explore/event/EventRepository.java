@@ -18,20 +18,20 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query("select e from Event as e where e.id = ?1 AND e.state = 'PUBLISHED'")
     Optional<Event> getPublicEventById(Integer eventId);
 
-    @Query(value = "SELECT * FROM events AS e WHERE (e.annotation LIKE CONCAT('%', :lowText, '%') OR e.description LIKE CONCAT('%', :lowText, '%')) AND e.paid = :paid " +
+    @Query(value = "SELECT * FROM events AS e WHERE (e.annotation LIKE CONCAT('%', :lowText, '%') OR e.description LIKE CONCAT('%', :lowText, '%')) " +
             "AND e.event_date > :rangeStart AND e.event_date < :rangeEnd AND e.state = 'PUBLISHED'", nativeQuery = true)
-    List<Event> getPublicEventByTextAndPaidAndStartAndEnd(@Param("lowText") String lowText, @Param("paid") Boolean paid, @Param("rangeStart") LocalDateTime rangeStart, @Param("rangeEnd") LocalDateTime rangeEnd);
+    List<Event> getPublicEventByTextAndStartAndEnd(@Param("lowText") String lowText, @Param("rangeStart") LocalDateTime rangeStart, @Param("rangeEnd") LocalDateTime rangeEnd);
 
-    @Query(value = "SELECT * FROM events AS e WHERE (e.annotation LIKE CONCAT('%', :lowText, '%') OR e.description LIKE CONCAT('%', :lowText, '%')) AND e.paid = :paid " +
+    @Query(value = "SELECT * FROM events AS e WHERE (e.annotation LIKE CONCAT('%', :lowText, '%') OR e.description LIKE CONCAT('%', :lowText, '%')) " +
             "AND e.event_date > :rangeStart AND e.state = 'PUBLISHED'", nativeQuery = true)
-    List<Event> getPublicEventByTextAndPaidAndStart(@Param("lowText") String lowText, @Param("paid") Boolean paid, @Param("rangeStart") LocalDateTime rangeStart);
+    List<Event> getPublicEventByTextAndStart(@Param("lowText") String lowText, @Param("rangeStart") LocalDateTime rangeStart);
 
-    @Query(value = "SELECT * FROM events AS e WHERE (e.annotation LIKE CONCAT('%', :lowText, '%') OR e.description LIKE CONCAT('%', :lowText, '%')) AND e.paid = :paid " +
+    @Query(value = "SELECT * FROM events AS e WHERE (e.annotation LIKE CONCAT('%', :lowText, '%') OR e.description LIKE CONCAT('%', :lowText, '%')) " +
             "AND e.event_date < :rangeEnd AND e.state = 'PUBLISHED'", nativeQuery = true)
-    List<Event> getPublicEventByTextAndPaidAndEnd(@Param("lowText") String lowText, @Param("paid") Boolean paid, @Param("rangeEnd") LocalDateTime rangeEnd);
+    List<Event> getPublicEventByTextAndEnd(@Param("lowText") String lowText, @Param("rangeEnd") LocalDateTime rangeEnd);
 
-    @Query("SELECT e FROM Event e WHERE (e.annotation LIKE %?1% OR e.description LIKE %?1%) AND e.paid = ?2 AND e.state = 'PUBLISHED'")
-    List<Event> getPublicEventByTextAndPaid(String lowText, Boolean paid);
+    @Query("SELECT e FROM Event e WHERE (e.annotation LIKE %?1% OR e.description LIKE %?1%) AND e.state = 'PUBLISHED'")
+    List<Event> getPublicEventByText(String lowText);
 
 
     @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids AND e.category IN :category ORDER BY e.event_date ASC OFFSET :from LIMIT :size", nativeQuery = true)

@@ -1,12 +1,13 @@
 package ru.practicum.explore.event.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.event.EventService;
-import ru.practicum.explore.event.dto.EventDtoIn;
 import ru.practicum.explore.event.dto.EventDtoOut;
+import ru.practicum.explore.event.dto.EventUpdateDtoIn;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class EventAdminController {
     @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.CREATED)
     public EventDtoOut updateAdminEvent(@PathVariable(name = "eventId") Integer eventId,
-                                        @RequestBody EventDtoIn eventDtoIn) {
+                                        @Valid @RequestBody EventUpdateDtoIn eventDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateAdminEvent, eventId - {}, eventDtoIn - {}", eventId, eventDtoIn);
         return eventService.updateAdminEvent(eventId, eventDtoIn);
     }

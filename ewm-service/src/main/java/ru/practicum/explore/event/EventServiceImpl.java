@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.event.controllers.EventClient;
-import ru.practicum.explore.event.dto.EventDtoIn;
-import ru.practicum.explore.event.dto.EventDtoOut;
-import ru.practicum.explore.event.dto.EventMapper;
-import ru.practicum.explore.event.dto.EventShortDtoOut;
+import ru.practicum.explore.event.dto.*;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.exception.BadRequestException;
 import ru.practicum.explore.exception.ConflictException;
@@ -53,7 +50,7 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     @Override
-    public EventDtoOut updateEvent(Integer userId, Integer eventId, EventDtoIn eventDtoIn) {
+    public EventDtoOut updateEvent(Integer userId, Integer eventId, EventUpdateDtoIn eventDtoIn) {
         checkEvent(eventId);
         Event event = eventRepository.findByIdAndInitiator(eventId, userId).orElseThrow(() -> new BadRequestException("Это событие не добавлено выбранным пользователем!"));
         if (event.getState().equals("PUBLISHED")) {
@@ -76,24 +73,34 @@ public class EventServiceImpl implements EventService {
         String lowText = text.toLowerCase();
         lowText = lowText.replace("\"", "");
         List<Event> events;
-        //сначала делаем выборку по датам, оплате и содержанию текста
+        //сначала делаем выборку по датам и содержанию текста
         if (rangeStart != null && rangeEnd != null) {
-            events = eventRepository.getPublicEventByTextAndPaidAndStartAndEnd(lowText, paid, parseDate(rangeStart), parseDate(rangeEnd));
+            if (parseDate(rangeStart).isAfter(parseDate(rangeEnd))) {
+                throw new BadRequestException("Дата начала события позже даты конца события!");
+            }
+            events = eventRepository.getPublicEventByTextAndStartAndEnd(lowText, parseDate(rangeStart), parseDate(rangeEnd));
         } else if (rangeStart != null && rangeEnd == null) {
-            events = eventRepository.getPublicEventByTextAndPaidAndStart(lowText, paid, parseDate(rangeStart));
+            events = eventRepository.getPublicEventByTextAndStart(lowText, parseDate(rangeStart));
         } else if (rangeStart == null && rangeEnd != null) {
-            events = eventRepository.getPublicEventByTextAndPaidAndEnd(lowText, paid, parseDate(rangeEnd));
+            events = eventRepository.getPublicEventByTextAndEnd(lowText, parseDate(rangeEnd));
         } else {
-            events = eventRepository.getPublicEventByTextAndPaid(lowText, paid);
+            events = eventRepository.getPublicEventByText(lowText);
+        }
+        //фильтруем по оплате
+        List<Event> firstEvents;
+        if (paid != null) {
+            firstEvents = events.stream().filter(event -> event.getPaid().equals(paid)).toList();
+        } else {
+            firstEvents = events;
         }
         //фильтруем по лимиту запросов на участие
         List<Integer> ids;
         if (onlyAvailable) {
-            List<EventDtoOut> nextEvents = events.stream().map(eventMapper::mapEventToEventDtoOut).toList();
+            List<EventDtoOut> nextEvents = firstEvents.stream().map(eventMapper::mapEventToEventDtoOut).toList();
             ids = nextEvents.stream().filter(eventDtoOut -> eventDtoOut.getConfirmedRequests() < eventDtoOut.getParticipantLimit())
                     .map(EventDtoOut::getId).toList();
         } else {
-            ids = events.stream().map(Event::getId).toList();
+            ids = firstEvents.stream().map(Event::getId).toList();
         }
         //фильтруем по категориям
         if (categories != null) {
@@ -192,7 +199,7 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     @Override
-    public EventDtoOut updateAdminEvent(Integer eventId, EventDtoIn eventDtoIn) {
+    public EventDtoOut updateAdminEvent(Integer eventId, EventUpdateDtoIn eventDtoIn) {
         Event event = getEvent(eventId);
         if (event.getState().equals("PUBLISHED") || event.getState().equals("CANCELED")) {
             throw new ConflictException("Event must not be published or canceled");
@@ -235,7 +242,7 @@ public class EventServiceImpl implements EventService {
         return LocalDateTime.parse(date.replace("\"", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
-    public void changeEventFields(Event event, EventDtoIn eventDtoIn) {
+    public void changeEventFields(Event event, EventUpdateDtoIn eventDtoIn) {
         if (eventDtoIn.getAnnotation() != null) {
             event.setAnnotation(eventDtoIn.getAnnotation());
         }
@@ -247,6 +254,7 @@ public class EventServiceImpl implements EventService {
         }
         if (eventDtoIn.getEventDate() != null) {
             checkValidTime(event.getEventDate(), 2, "Дата и время на которые намечено событие не может быть раньше, чем 2 часа от текущего момента");
+            checkValidTime(LocalDateTime.parse(eventDtoIn.getEventDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 0, "Дата и время события не может быть в прошлом");
             event.setEventDate(parseDate(eventDtoIn.getEventDate()));
         }
         if (eventDtoIn.getLocation() != null) {

@@ -9,6 +9,7 @@ import ru.practicum.explore.event.EventService;
 import ru.practicum.explore.event.dto.EventDtoIn;
 import ru.practicum.explore.event.dto.EventDtoOut;
 import ru.practicum.explore.event.dto.EventShortDtoOut;
+import ru.practicum.explore.event.dto.EventUpdateDtoIn;
 import ru.practicum.explore.participation.ParticipationService;
 import ru.practicum.explore.participation.dto.ParticipationDtoOut;
 import ru.practicum.explore.participation.dto.ParticipationUpdateDtoIn;
@@ -48,10 +49,9 @@ public class EventPrivateController {
     }
 
     @PatchMapping("/{eventId}")
-    @ResponseStatus(HttpStatus.CREATED)
     public EventDtoOut updateEvent(@PathVariable(name = "userId") Integer userId,
                                    @PathVariable(name = "eventId") Integer eventId,
-                                   @RequestBody EventDtoIn eventDtoIn) {
+                                   @Valid @RequestBody EventUpdateDtoIn eventDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateEvent, userId - {}, eventId - {}, eventDtoIn - {}", userId, eventId, eventDtoIn);
         return eventService.updateEvent(userId, eventId, eventDtoIn);
     }

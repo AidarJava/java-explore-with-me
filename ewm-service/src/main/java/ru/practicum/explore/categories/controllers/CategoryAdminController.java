@@ -31,7 +31,6 @@ public class CategoryAdminController {
     }
 
     @PatchMapping("/{catId}")
-    @ResponseStatus(HttpStatus.CREATED)
     public CategoryDtoOut updateCategory(@PathVariable(name = "catId") Integer catId,
                                          @Valid @RequestBody CategoryDtoIn categoryDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateCategory, catId - {}, categoryDtoIn - {}", catId, categoryDtoIn);

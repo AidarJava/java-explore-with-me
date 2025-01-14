@@ -31,7 +31,6 @@ public class CompilationsAdminController {
     }
 
     @PatchMapping("/{compId}")
-    @ResponseStatus(HttpStatus.CREATED)
     public CompilationsDtoOut updateCompilation(@PathVariable(name = "compId") Integer compId,
                                                 @Valid @RequestBody CompilationsDtoIn compilationsDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateCompilation, compId - {}, compilationsDtoIn - {}", compId, compilationsDtoIn);
