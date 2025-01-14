@@ -2,6 +2,7 @@ package ru.practicum.explore.participation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.participation.dto.ParticipationDtoOut;
 
@@ -21,6 +22,7 @@ public class ParticipationController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationDtoOut addParticipation(@PathVariable(name = "userId") Integer userId,
                                                 @RequestParam(name = "eventId") Integer eventId) {
         log.info("POST/ Проверка параметров запроса метода addParticipation, userId - {}, eventId - {}", userId, eventId);
@@ -28,6 +30,7 @@ public class ParticipationController {
     }
 
     @PatchMapping("/{requestId}/cancel")
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationDtoOut cancelParticipation(@PathVariable(name = "userId") Integer userId,
                                                    @PathVariable(name = "requestId") Integer requestId) {
         log.info("PATCH/ Проверка параметров запроса метода cancelParticipation, userId - {}, requestId - {}", userId, requestId);

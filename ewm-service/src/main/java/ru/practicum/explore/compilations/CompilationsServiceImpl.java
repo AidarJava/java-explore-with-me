@@ -22,8 +22,10 @@ public class CompilationsServiceImpl implements CompilationsService {
     @Override
     public CompilationsDtoOut addCompilation(CompilationsDtoIn compilationsDtoIn) {
         Compilations compilations = compilationsRepository.save(compilationsMapper.mapCompilationsDtoInToCompilations(compilationsDtoIn));
-        for (int i = 0; i < compilationsDtoIn.getEvents().size(); i++) {
-            jdbcTemplate.update("INSERT INTO compilations_events (compilation_id, event_id) VALUES (?, ?)", compilations.getId(), compilationsDtoIn.getEvents().get(i));
+        if (compilationsDtoIn.getEvents() != null && !compilationsDtoIn.getEvents().isEmpty()) {
+            for (int i = 0; i < compilationsDtoIn.getEvents().size(); i++) {
+                jdbcTemplate.update("INSERT INTO compilations_events (compilation_id, event_id) VALUES (?, ?)", compilations.getId(), compilationsDtoIn.getEvents().get(i));
+            }
         }
         return compilationsMapper.mapCompilationsToCompilationsDtoOut(compilations);
     }

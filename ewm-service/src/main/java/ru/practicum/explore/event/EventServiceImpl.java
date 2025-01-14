@@ -11,6 +11,7 @@ import ru.practicum.explore.event.dto.EventMapper;
 import ru.practicum.explore.event.dto.EventShortDtoOut;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.exception.BadRequestException;
+import ru.practicum.explore.exception.ConflictException;
 import ru.practicum.explore.exception.ForbiddenException;
 import ru.practicum.explore.exception.NotFoundException;
 
@@ -33,7 +34,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDtoOut addEvent(Integer userId, EventDtoIn eventDtoIn) {
         Event event = eventMapper.mapEventDtoInToEvent(eventDtoIn);
-        checkValidTime(event.getEventDate());
+        checkValidTime(event.getEventDate(), 2, "Дата и время на которые намечено событие не может быть раньше, чем 2 часа от текущего момента");
         event.setInitiator(userId);
         return eventMapper.mapEventToEventDtoOut(eventRepository.save(event));
     }
@@ -47,24 +48,23 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDtoOut getFullEvent(Integer userId, Integer eventId) {
         checkEvent(eventId);
-        return eventMapper.mapEventToEventDtoOut(eventRepository.findByIdAndInitiator(eventId, userId));
+        return eventMapper.mapEventToEventDtoOut(eventRepository.findByIdAndInitiator(eventId, userId).orElseThrow(() -> new BadRequestException("Это событие не добавлено выбранным пользователем!")));
     }
 
     @Transactional
     @Override
     public EventDtoOut updateEvent(Integer userId, Integer eventId, EventDtoIn eventDtoIn) {
         checkEvent(eventId);
-        Event event = eventRepository.findByIdAndInitiator(eventId, userId);
+        Event event = eventRepository.findByIdAndInitiator(eventId, userId).orElseThrow(() -> new BadRequestException("Это событие не добавлено выбранным пользователем!"));
         if (event.getState().equals("PUBLISHED")) {
             throw new BadRequestException("Event must not be published");
         } else if (!event.getState().equals("PENDING") && !event.getState().equals("CANCELED")) {
             throw new ForbiddenException("Only pending or canceled events can be changed");
         }
         changeEventFields(event, eventDtoIn);
-        if (eventDtoIn.getStateAction().equals("CANCEL_REVIEW")) {
-            event.setState("PUBLISHED");
-            event.setPublishedOn(LocalDateTime.now());
-        } else if (eventDtoIn.getStateAction().equals("SEND_TO_REVIEW")) {
+        if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("CANCEL_REVIEW")) {
+            event.setState("CANCELED");
+        } else if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("SEND_TO_REVIEW")) {
             event.setState("PENDING");
         }
         return eventMapper.mapEventToEventDtoOut(eventRepository.save(event));
@@ -194,24 +194,17 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDtoOut updateAdminEvent(Integer eventId, EventDtoIn eventDtoIn) {
         Event event = getEvent(eventId);
-        LocalDateTime date = parseDate(eventDtoIn.getEventDate());
-        if (!date.isAfter(LocalDateTime.now().plusHours(1))) {
-            throw new BadRequestException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
+        if (event.getState().equals("PUBLISHED") || event.getState().equals("CANCELED")) {
+            throw new ConflictException("Event must not be published or canceled");
         }
+        LocalDateTime date = event.getEventDate();
+        checkValidTime(date, 1, "Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
         changeEventFields(event, eventDtoIn);
-        if (eventDtoIn.getStateAction().equals("PUBLISH_EVENT")) {
-            if (event.getState().equals("PENDING")) {
-                event.setState("PUBLISHED");
-                event.setPublishedOn(LocalDateTime.now());
-            } else {
-                throw new ForbiddenException("Cannot publish the event because it's not in the right state: PUBLISHED");
-            }
-        } else if (eventDtoIn.getStateAction().equals("REJECT_EVENT")) {
-            if (!event.getState().equals("PUBLISHED")) {
-                event.setState("CANCELED");
-            } else {
-                throw new ForbiddenException("Событие можно отклонить, только если оно еще не опубликовано");
-            }
+        if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("PUBLISH_EVENT")) {
+            event.setState("PUBLISHED");
+            event.setPublishedOn(LocalDateTime.now());
+        } else if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("REJECT_EVENT")) {
+            event.setState("CANCELED");
         }
         return eventMapper.mapEventToEventDtoOut(eventRepository.save(event));
     }
@@ -222,9 +215,9 @@ public class EventServiceImpl implements EventService {
                 .sorted(Comparator.comparing(EventShortDtoOut::getViews, Comparator.nullsLast(Comparator.naturalOrder())).reversed()).toList();
     }
 
-    public void checkValidTime(LocalDateTime time) {
-        if (LocalDateTime.now().plusHours(2).isAfter(time)) {
-            throw new ForbiddenException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента, EventDate - " + time);
+    public void checkValidTime(LocalDateTime time, Integer hours, String string) {
+        if (LocalDateTime.now().plusHours(hours).isAfter(time)) {
+            throw new BadRequestException(string);
         }
     }
 
@@ -253,7 +246,7 @@ public class EventServiceImpl implements EventService {
             event.setDescription(eventDtoIn.getDescription());
         }
         if (eventDtoIn.getEventDate() != null) {
-            checkValidTime(event.getEventDate());
+            checkValidTime(event.getEventDate(), 2, "Дата и время на которые намечено событие не может быть раньше, чем 2 часа от текущего момента");
             event.setEventDate(parseDate(eventDtoIn.getEventDate()));
         }
         if (eventDtoIn.getLocation() != null) {

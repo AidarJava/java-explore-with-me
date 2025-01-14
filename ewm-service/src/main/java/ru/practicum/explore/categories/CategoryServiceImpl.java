@@ -9,6 +9,8 @@ import ru.practicum.explore.categories.dto.CategoryDtoIn;
 import ru.practicum.explore.categories.dto.CategoryDtoOut;
 import ru.practicum.explore.categories.dto.CategoryMapper;
 import ru.practicum.explore.categories.model.Category;
+import ru.practicum.explore.event.EventRepository;
+import ru.practicum.explore.exception.ConflictException;
 import ru.practicum.explore.exception.NotFoundException;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final EventRepository eventRepository;
 
     @Override
     public List<CategoryDtoOut> getCategories(Integer from, Integer size) {
@@ -42,6 +45,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<Void> deleteCategory(Integer catId) {
         getCategory(catId);
+        if (!eventRepository.findAllByCategory(catId).isEmpty()) {
+            throw new ConflictException(("C категорий не должно быть связано ни одного события!"));
+        }
         categoryRepository.deleteById(catId);
         return ResponseEntity.noContent().build();
     }

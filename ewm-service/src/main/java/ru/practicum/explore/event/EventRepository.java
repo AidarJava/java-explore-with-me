@@ -13,7 +13,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query(value = "SELECT * FROM events AS e WHERE e.initiator = :userId OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEvents(@Param("userId") Integer userId, @Param("from") Integer from, @Param("size") Integer size);
 
-    Event findByIdAndInitiator(Integer eventId, Integer userId);
+    Optional<Event> findByIdAndInitiator(Integer eventId, Integer userId);
 
     @Query("select e from Event as e where e.id = ?1 AND e.state = 'PUBLISHED'")
     Optional<Event> getPublicEventById(Integer eventId);
@@ -34,13 +34,13 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     List<Event> getPublicEventByTextAndPaid(String lowText, Boolean paid);
 
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids AND e.category IN :category OFFSET :from LIMIT :size ORDER BY e.event_date ASC", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids AND e.category IN :category ORDER BY e.event_date ASC OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEventsSortDateAndCategory(@Param("ids") List<Integer> ids, @Param("category") Integer[] category, @Param("from") Integer from, @Param("size") Integer size);
 
     @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids AND e.category IN :category OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEventsSortViewsAndCategory(@Param("ids") List<Integer> ids, @Param("category") Integer[] category, @Param("from") Integer from, @Param("size") Integer size);
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids OFFSET :from LIMIT :size ORDER BY e.event_date ASC", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids ORDER BY e.event_date ASC OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEventsSortDate(@Param("ids") List<Integer> ids, @Param("from") Integer from, @Param("size") Integer size);
 
     @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids OFFSET :from LIMIT :size", nativeQuery = true)
@@ -91,4 +91,5 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query("select e from Event as e where e.id IN ?1")
     List<Event> getCompilationsEvents(List<Integer> ids);
 
+    List<Event> findAllByCategory(Integer catId);
 }

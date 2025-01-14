@@ -3,6 +3,7 @@ package ru.practicum.explore.categories.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.categories.CategoryService;
@@ -17,6 +18,7 @@ public class CategoryAdminController {
     private final CategoryService categoryService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CategoryDtoOut addCategory(@Valid @RequestBody CategoryDtoIn categoryDtoIn) {
         log.info("POST/ Проверка параметров запроса метода addCategory, categoryDtoIn - {}", categoryDtoIn.getName());
         return categoryService.addCategory(categoryDtoIn);
@@ -29,6 +31,7 @@ public class CategoryAdminController {
     }
 
     @PatchMapping("/{catId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public CategoryDtoOut updateCategory(@PathVariable(name = "catId") Integer catId,
                                          @Valid @RequestBody CategoryDtoIn categoryDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateCategory, catId - {}, categoryDtoIn - {}", catId, categoryDtoIn);

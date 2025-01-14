@@ -38,11 +38,14 @@ public class EventMapper {
         } else {
             event.setParticipantLimit(eventDtoIn.getParticipantLimit());
         }
+
         if (!eventDtoIn.getRequestModeration()) {
             event.setState("PUBLISHED");
             event.setPublishedOn(LocalDateTime.now());
+            event.setRequestModeration(false);
         } else {
             event.setState("PENDING");
+            event.setRequestModeration(true);
         }
         event.setTitle(eventDtoIn.getTitle());
         return event;

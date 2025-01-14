@@ -24,15 +24,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDtoOut> getUsers(Integer[] ids, Integer from, Integer size) {
         if (ids == null) {
-            if (size == null) {
-                return userRepository.findUsersWithFrom(from).stream().map(mapper::mapUserToUserDtoOut).toList();
-            }
             return userRepository.findUsersWithLimit(from, size).stream().map(mapper::mapUserToUserDtoOut).toList();
-
         } else {
-            if (size == null) {
-                return userRepository.findUsersByIdsWithFrom(ids, from).stream().map(mapper::mapUserToUserDtoOut).toList();
-            }
             return userRepository.findUsersByIdsWithLimit(ids, from, size).stream().map(mapper::mapUserToUserDtoOut).toList();
         }
     }

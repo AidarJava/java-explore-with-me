@@ -3,6 +3,7 @@ package ru.practicum.explore.event.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.event.EventService;
 import ru.practicum.explore.event.dto.EventDtoIn;
@@ -24,6 +25,7 @@ public class EventPrivateController {
     private final ParticipationService participationService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public EventDtoOut addEvent(@PathVariable(name = "userId") Integer userId,
                                 @Valid @RequestBody EventDtoIn eventDtoIn) {
         log.info("POST/ Проверка параметров запроса метода addEvent, userId - {}, eventDtoIn - {}", userId, eventDtoIn);
@@ -46,9 +48,10 @@ public class EventPrivateController {
     }
 
     @PatchMapping("/{eventId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public EventDtoOut updateEvent(@PathVariable(name = "userId") Integer userId,
                                    @PathVariable(name = "eventId") Integer eventId,
-                                   @Valid @RequestBody EventDtoIn eventDtoIn) {
+                                   @RequestBody EventDtoIn eventDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateEvent, userId - {}, eventId - {}, eventDtoIn - {}", userId, eventId, eventDtoIn);
         return eventService.updateEvent(userId, eventId, eventDtoIn);
     }
@@ -61,6 +64,7 @@ public class EventPrivateController {
     }
 
     @PatchMapping("/{eventId}/requests")
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationUpdateDtoOut updateEventRequests(@PathVariable(name = "userId") Integer userId,
                                                          @PathVariable(name = "eventId") Integer eventId,
                                                          @Valid @RequestBody ParticipationUpdateDtoIn participationUpdateDtoIn) {
