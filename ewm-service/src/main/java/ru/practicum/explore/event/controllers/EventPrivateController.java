@@ -50,7 +50,7 @@ public class EventPrivateController {
                                    @PathVariable(name = "eventId") Integer eventId,
                                    @Valid @RequestBody EventDtoIn eventDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateEvent, userId - {}, eventId - {}, eventDtoIn - {}", userId, eventId, eventDtoIn);
-        return eventService.getFullEvent(userId, eventId);
+        return eventService.updateEvent(userId, eventId, eventDtoIn);
     }
 
     @GetMapping("/{eventId}/requests")
