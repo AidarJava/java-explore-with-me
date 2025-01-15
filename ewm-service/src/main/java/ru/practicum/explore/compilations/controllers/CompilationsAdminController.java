@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.compilations.CompilationsService;
 import ru.practicum.explore.compilations.dto.CompilationsDtoIn;
 import ru.practicum.explore.compilations.dto.CompilationsDtoOut;
+import ru.practicum.explore.compilations.dto.CompilationsUpdateDtoIn;
 
 @Slf4j
 @RestController
@@ -32,7 +33,7 @@ public class CompilationsAdminController {
 
     @PatchMapping("/{compId}")
     public CompilationsDtoOut updateCompilation(@PathVariable(name = "compId") Integer compId,
-                                                @RequestBody(required = false) CompilationsDtoIn compilationsDtoIn) {
+                                                @Valid @RequestBody CompilationsUpdateDtoIn compilationsDtoIn) {
         log.info("PATCH/ Проверка параметров запроса метода updateCompilation, compId - {}, compilationsDtoIn - {}", compId, compilationsDtoIn);
         return compilationsService.updateCompilation(compId, compilationsDtoIn);
     }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.explore.compilations.dto.CompilationsDtoIn;
 import ru.practicum.explore.compilations.dto.CompilationsDtoOut;
 import ru.practicum.explore.compilations.dto.CompilationsMapper;
+import ru.practicum.explore.compilations.dto.CompilationsUpdateDtoIn;
 import ru.practicum.explore.compilations.model.Compilations;
 import ru.practicum.explore.exception.NotFoundException;
 
@@ -38,10 +39,7 @@ public class CompilationsServiceImpl implements CompilationsService {
     }
 
     @Override
-    public CompilationsDtoOut updateCompilation(Integer compId, CompilationsDtoIn compilationsDtoIn) {
-        if (compilationsDtoIn == null) { //ошибка в тестах
-            return getPublicCompilationsById(compId);
-        }
+    public CompilationsDtoOut updateCompilation(Integer compId, CompilationsUpdateDtoIn compilationsDtoIn) {
         Compilations compilations = compilationsRepository.findById(compId).orElseThrow(() -> new NotFoundException("Compilation with id=" + compId + " was not found"));
         if (compilationsDtoIn.getEvents() != null) {
             jdbcTemplate.update("DELETE FROM compilations_events AS ce WHERE ce.compilation_id = ?", compilations.getId());
