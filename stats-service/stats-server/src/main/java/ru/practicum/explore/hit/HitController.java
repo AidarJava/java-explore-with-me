@@ -2,6 +2,7 @@ package ru.practicum.explore.hit;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.dto.HitDtoIn;
 import ru.practicum.explore.dto.HitDtoOut;
@@ -16,6 +17,7 @@ public class HitController {
     private final HitServiceImpl hitService;
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public HitDtoOut addRecord(@RequestBody HitDtoIn hitDtoIn) {
         log.info("POST/ Проверка параметров запроса метода addRecord, hitDtoIn - {}", hitDtoIn);
         return hitService.addRecord(hitDtoIn);
