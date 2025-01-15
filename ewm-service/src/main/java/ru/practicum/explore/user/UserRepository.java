@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(value = "SELECT * FROM users OFFSET :from", nativeQuery = true)
     List<User> findUsersWithFrom(@Param("from") Integer from);
+
+    User findByEmail(String string);
 }

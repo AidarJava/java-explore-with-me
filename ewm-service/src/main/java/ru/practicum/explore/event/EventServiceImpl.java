@@ -38,8 +38,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDtoOut> getEvents(Integer userId, Integer from, Integer size) {
-        return eventRepository.getEvents(userId, from, size).stream().map(eventMapper::mapEventToEventShortDtoOut)
-                .sorted(Comparator.comparing(EventShortDtoOut::getViews, Comparator.nullsLast(Comparator.naturalOrder())).reversed()).toList();
+        return eventRepository.getEvents(userId, from, size).stream().map(eventMapper::mapEventToEventShortDtoOut).toList();
+        // .sorted(Comparator.comparing(EventShortDtoOut::getViews, Comparator.nullsLast(Comparator.naturalOrder())).reversed()).toList();
     }
 
     @Override
@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService {
         checkEvent(eventId);
         Event event = eventRepository.findByIdAndInitiator(eventId, userId).orElseThrow(() -> new BadRequestException("Это событие не добавлено выбранным пользователем!"));
         if (event.getState().equals("PUBLISHED")) {
-            throw new BadRequestException("Event must not be published");
+            throw new ConflictException("Event must not be published");
         } else if (!event.getState().equals("PENDING") && !event.getState().equals("CANCELED")) {
             throw new ForbiddenException("Only pending or canceled events can be changed");
         }
@@ -70,6 +70,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDtoOut> getPublicEvent(String text, Integer[] categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size) {
         eventClient.sendHit();
+        try {
+            Thread.sleep(1000); // Задержка 1 секунда для синхронизации
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Ошибка задержки: " + e.getMessage(), e);
+        }
         String lowText = text.toLowerCase();
         lowText = lowText.replace("\"", "");
         List<Event> events;
@@ -127,6 +133,12 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
         if (event.getState().equals("PUBLISHED")) {
             eventClient.sendHitId(eventId);
+            try {
+                Thread.sleep(1000); // Задержка 1 секунда для синхронизации
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Ошибка задержки: " + e.getMessage(), e);
+            }
         }
         return eventMapper.mapEventToEventDtoOut(event);
     }

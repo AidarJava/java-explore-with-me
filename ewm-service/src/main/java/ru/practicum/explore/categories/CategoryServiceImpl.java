@@ -38,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @Override
     public CategoryDtoOut addCategory(CategoryDtoIn categoryDtoIn) {
-        //validCat(categoryDtoIn.getName());
+        validCat(categoryDtoIn.getName());
         return categoryMapper.mapCategoryToCategoryDtoOut(categoryRepository.save(categoryMapper.mapCategoryDtoInToCategory(categoryDtoIn)));
     }
 
@@ -57,7 +57,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDtoOut updateCategory(Integer catId, CategoryDtoIn categoryDtoIn) {
         Category categoryById = categoryRepository.findById(catId).orElseThrow(() -> new NotFoundException("Category with id=" + catId + " was not found"));
-        //validCat(categoryDtoIn.getName());
+        if (!categoryById.getName().equals(categoryDtoIn.getName())) {
+            validCat(categoryDtoIn.getName());
+        }
         categoryById.setName(categoryDtoIn.getName());
         return categoryMapper.mapCategoryToCategoryDtoOut(categoryRepository.save(categoryById));
     }

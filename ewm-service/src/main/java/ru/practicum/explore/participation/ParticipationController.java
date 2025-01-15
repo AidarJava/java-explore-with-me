@@ -30,7 +30,6 @@ public class ParticipationController {
     }
 
     @PatchMapping("/{requestId}/cancel")
-    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationDtoOut cancelParticipation(@PathVariable(name = "userId") Integer userId,
                                                    @PathVariable(name = "requestId") Integer requestId) {
         log.info("PATCH/ Проверка параметров запроса метода cancelParticipation, userId - {}, requestId - {}", userId, requestId);

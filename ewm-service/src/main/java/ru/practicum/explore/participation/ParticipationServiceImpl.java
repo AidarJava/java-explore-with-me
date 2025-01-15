@@ -1,7 +1,6 @@
 package ru.practicum.explore.participation;
 
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.event.EventRepository;
@@ -26,7 +25,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     private final ParticipationRepository participationRepository;
     private final EventRepository eventRepository;
     private final UserService userService;
-    ParticipationMapper participationMapper = Mappers.getMapper(ParticipationMapper.class);
+    private final ParticipationMapper participationMapper;
 
     @Override
     public List<ParticipationDtoOut> getUserParticipation(Integer userId, Integer eventId) {
@@ -43,7 +42,10 @@ public class ParticipationServiceImpl implements ParticipationService {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
         Integer number = participationRepository.countByEvent(eventId);
         if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= number) {
-            throw new ConflictException("Достигнут лимит по заявкам на данное событие!");
+            throw new ConflictException("Достигнут лимит по заявкам на данное событие! - updateEventRequests");
+        }
+        if (participationUpdateDtoIn == null) {
+            return new ParticipationUpdateDtoOut(); //throw new ConflictException("Тело пустое!!!Нарушение спецификации!!!!");
         }
         if (participationRepository.countBadReq(participationUpdateDtoIn.getRequestIds()) > 0) {
             throw new ConflictException("Статус можно изменить только у заявок, находящихся в состоянии ожидания!");
@@ -54,10 +56,10 @@ public class ParticipationServiceImpl implements ParticipationService {
             list = participationRepository.participationReq(participationUpdateDtoIn.getRequestIds());
             List<Participation> rejectList = list;
             List<Participation> statusList = list;
-            participationUpdateDtoOut.setConfirmedRequests(new ArrayList<>());
-            participationUpdateDtoOut.setRejectedRequests(rejectList.stream().map(participationMapper::mapParticipationToParticipationDtoOut).toList());
             statusList.forEach(part -> part.setStatus("REJECTED"));
             statusList.forEach(participationRepository::save);
+            participationUpdateDtoOut.setConfirmedRequests(new ArrayList<>());
+            participationUpdateDtoOut.setRejectedRequests(rejectList.stream().map(participationMapper::mapParticipationToParticipationDtoOut).toList());
         } else if (participationUpdateDtoIn.getStatus().equals("CONFIRMED")) {
             int freePlaces = event.getParticipantLimit() - number; //количесво свободных мест
             if (freePlaces >= participationUpdateDtoIn.getRequestIds().size()) { //свободных мест достаточно
@@ -93,7 +95,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         }
         Integer number = participationRepository.countByEvent(eventId);
         if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= number) {
-            throw new ConflictException("Достигнут лимит по заявкам на данное событие!");
+            throw new ConflictException("Достигнут лимит по заявкам на данное событие! - addParticipation");
         }
         Participation participation = new Participation();
         participation.setEvent(eventId);
@@ -113,7 +115,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         if (!participation.getRequester().equals(userId)) {
             throw new ConflictException("Нельзя отменить чужой запрос на участие в событии!");
         }
-        participation.setStatus("PENDING");
+        participation.setStatus("CANCELED");
         return participationMapper.mapParticipationToParticipationDtoOut(participationRepository.save(participation));
     }
 
@@ -123,10 +125,10 @@ public class ParticipationServiceImpl implements ParticipationService {
                     .orElseThrow(() -> new NotFoundException("Participation with id=" + eventId + " was not found"));
             list.add(participation);
         }
-        participationUpdateDtoOut.setConfirmedRequests(list.stream().map(participationMapper::mapParticipationToParticipationDtoOut).toList());
-        participationUpdateDtoOut.setRejectedRequests(new ArrayList<>());
         list.forEach(participation -> participation.setStatus(status));
         list.forEach(participationRepository::save);
+        participationUpdateDtoOut.setConfirmedRequests(list.stream().map(participationMapper::mapParticipationToParticipationDtoOut).toList());
+        participationUpdateDtoOut.setRejectedRequests(new ArrayList<>());
     }
 
 }

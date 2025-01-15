@@ -36,7 +36,7 @@ public class EventClient {
         webClient.post()
                 .uri(uriBuilder -> uriBuilder.path("/events/{id}").build(id))
                 .exchangeToMono(response -> response.toEntity(Void.class))
-                .subscribe();
+                .block();
     }
 
     public void sendHit() {
@@ -44,11 +44,11 @@ public class EventClient {
         webClient.post()
                 .uri(uriBuilder -> uriBuilder.path("/events").build())
                 .exchangeToMono(response -> response.toEntity(Void.class))
-                .subscribe();
+                .block();
     }
 
     public List<Stats> getHits(String start, String end, String[] uris, Boolean unique) {
-        log.info("Отправка данных о событии в гейтвей статистики {}, {} , {} ,{}", start, end, uris, unique);
+        log.info("Запрос данных о событии из гейтвея статистики {}, {} , {} ,{}", start, end, uris, unique);
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/events/stats")
                         .queryParam("start", start)

@@ -1,7 +1,6 @@
 package ru.practicum.explore.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +45,7 @@ public class HitGatewayController {
     }
 
     @PostMapping("/{id}")
-    public Mono<ResponseEntity<HitDtoOut>> addRecordWithId(@Positive @PathVariable(name = "id") Integer id,
+    public Mono<ResponseEntity<HitDtoOut>> addRecordWithId(@PathVariable(name = "id") Integer id,
                                                            HttpServletRequest request) {
         log.info("POST/ Проверка параметров запроса метода addRecordWithId, URI - {}, IP - {}", request.getRequestURI(), request.getRemoteAddr());
         return webClient.post()

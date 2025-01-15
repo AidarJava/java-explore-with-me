@@ -5,6 +5,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.exception.ConflictException;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.user.dto.UserDtoIn;
 import ru.practicum.explore.user.dto.UserDtoOut;
@@ -33,6 +34,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDtoOut addUser(UserDtoIn userDtoIn) {
+        if (userRepository.findByEmail(userDtoIn.getEmail()) != null) {
+            throw new ConflictException("Email пользователя должно быть уникальным!");
+        }
         return mapper.mapUserToUserDtoOut(userRepository.save(mapper.mapUserDtoInToUser(userDtoIn)));
     }
 

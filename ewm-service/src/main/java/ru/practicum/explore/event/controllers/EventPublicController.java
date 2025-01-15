@@ -20,7 +20,7 @@ public class EventPublicController {
     @GetMapping
     public List<EventShortDtoOut> getPublicEvent(@RequestParam(name = "text", defaultValue = "_") String text,
                                                  @RequestParam(name = "categories", required = false) Integer[] categories,
-                                                 @RequestParam(name = "paid", defaultValue = "false") Boolean paid,
+                                                 @RequestParam(name = "paid", required = false) Boolean paid,
                                                  @RequestParam(name = "rangeStart", required = false) String rangeStart,
                                                  @RequestParam(name = "rangeEnd", required = false) String rangeEnd,
                                                  @RequestParam(name = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
