@@ -3,6 +3,7 @@ package ru.practicum.explore.event.dto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.explore.categories.CategoryService;
+import ru.practicum.explore.enums.EveState;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.location.model.Location;
 import ru.practicum.explore.participation.ParticipationRepository;
@@ -44,7 +45,7 @@ public class EventMapper {
         } else {
             event.setRequestModeration(true);
         }
-        event.setState("PENDING");
+        event.setState(EveState.PENDING);
         event.setTitle(eventDtoIn.getTitle());
         return event;
     }
@@ -69,7 +70,7 @@ public class EventMapper {
             eventDtoOut.setPublishedOn(event.getPublishedOn().format(format));
         }
         eventDtoOut.setRequestModeration(event.getRequestModeration());
-        eventDtoOut.setState(event.getState());
+        eventDtoOut.setState(event.getState().toString());
         eventDtoOut.setTitle(event.getTitle());
 //        eventDtoOut.setViews(eventClient.getHits(event.getCreatedOn().format(format), LocalDateTime.now().format(format), new String[]{"/events/" + event.getId()}, true).getFirst().getHits());
         return eventDtoOut;

@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.enums.EveState;
+import ru.practicum.explore.enums.StateAction;
 import ru.practicum.explore.event.controllers.EventClient;
 import ru.practicum.explore.event.dto.*;
 import ru.practicum.explore.event.model.Event;
@@ -53,16 +55,16 @@ public class EventServiceImpl implements EventService {
     public EventDtoOut updateEvent(Integer userId, Integer eventId, EventUpdateDtoIn eventDtoIn) {
         checkEvent(eventId);
         Event event = eventRepository.findByIdAndInitiator(eventId, userId).orElseThrow(() -> new BadRequestException("Это событие не добавлено выбранным пользователем!"));
-        if (event.getState().equals("PUBLISHED")) {
+        if (event.getState().equals(EveState.PUBLISHED)) {
             throw new ConflictException("Event must not be published");
-        } else if (!event.getState().equals("PENDING") && !event.getState().equals("CANCELED")) {
+        } else if (!event.getState().equals(EveState.PENDING) && !event.getState().equals(EveState.CANCELED)) {
             throw new ForbiddenException("Only pending or canceled events can be changed");
         }
         changeEventFields(event, eventDtoIn);
-        if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("CANCEL_REVIEW")) {
-            event.setState("CANCELED");
-        } else if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("SEND_TO_REVIEW")) {
-            event.setState("PENDING");
+        if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
+            event.setState(EveState.CANCELED);
+        } else if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals(StateAction.SEND_TO_REVIEW)) {
+            event.setState(EveState.PENDING);
         }
         return eventMapper.mapEventToEventDtoOut(eventRepository.save(event));
     }
@@ -125,7 +127,7 @@ public class EventServiceImpl implements EventService {
     public EventDtoOut getPublicEventById(Integer eventId) {
         Event event = eventRepository.getPublicEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
-        if (event.getState().equals("PUBLISHED")) {
+        if (event.getState().equals(EveState.PUBLISHED)) {
             eventClient.sendHitId(eventId);
             try {
                 Thread.sleep(1000); // Задержка 1 секунда для синхронизации
@@ -212,17 +214,17 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDtoOut updateAdminEvent(Integer eventId, EventUpdateDtoIn eventDtoIn) {
         Event event = getEvent(eventId);
-        if (event.getState().equals("PUBLISHED") || event.getState().equals("CANCELED")) {
+        if (event.getState().equals(EveState.PUBLISHED) || event.getState().equals(EveState.CANCELED)) {
             throw new ConflictException("Event must not be published or canceled");
         }
         LocalDateTime date = event.getEventDate();
         checkValidTime(date, 1, "Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
         changeEventFields(event, eventDtoIn);
-        if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("PUBLISH_EVENT")) {
-            event.setState("PUBLISHED");
+        if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
+            event.setState(EveState.PUBLISHED);
             event.setPublishedOn(LocalDateTime.now());
-        } else if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals("REJECT_EVENT")) {
-            event.setState("CANCELED");
+        } else if (eventDtoIn.getStateAction() != null && eventDtoIn.getStateAction().equals(StateAction.REJECT_EVENT)) {
+            event.setState(EveState.CANCELED);
         }
         return eventMapper.mapEventToEventDtoOut(eventRepository.save(event));
     }

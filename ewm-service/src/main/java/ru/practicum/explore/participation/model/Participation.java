@@ -3,6 +3,7 @@ package ru.practicum.explore.participation.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ru.practicum.explore.enums.PartState;
 
 import java.time.LocalDateTime;
 
@@ -17,5 +18,6 @@ public class Participation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
     Integer requester;
-    String status;
+    @Enumerated(EnumType.STRING)
+    PartState status;
 }

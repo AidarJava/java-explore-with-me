@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.practicum.explore.enums.EveState;
 
 import java.time.LocalDateTime;
 
@@ -44,7 +45,8 @@ public class Event {
     LocalDateTime publishedOn;
     @Column(name = "request_moderation")
     Boolean requestModeration;
-    String state;
+    @Enumerated(EnumType.STRING)
+    EveState state;
     @NotBlank
     String title;
 }

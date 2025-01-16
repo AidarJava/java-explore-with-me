@@ -3,6 +3,9 @@ package ru.practicum.explore.participation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.enums.PartState;
+import ru.practicum.explore.enums.EveState;
+import ru.practicum.explore.enums.UpdateState;
 import ru.practicum.explore.event.EventRepository;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.exception.BadRequestException;
@@ -52,23 +55,23 @@ public class ParticipationServiceImpl implements ParticipationService {
         }
         ParticipationUpdateDtoOut participationUpdateDtoOut = new ParticipationUpdateDtoOut();
         List<Participation> list = new ArrayList<>();
-        if (participationUpdateDtoIn.getStatus().equals("REJECTED")) { //если отмена
+        if (participationUpdateDtoIn.getStatus().equals(UpdateState.REJECTED)) { //если отмена
             list = participationRepository.participationReq(participationUpdateDtoIn.getRequestIds());
             List<Participation> rejectList = list;
             List<Participation> statusList = list;
-            statusList.forEach(part -> part.setStatus("REJECTED"));
+            statusList.forEach(part -> part.setStatus(PartState.REJECTED));
             statusList.forEach(participationRepository::save);
             participationUpdateDtoOut.setConfirmedRequests(new ArrayList<>());
             participationUpdateDtoOut.setRejectedRequests(rejectList.stream().map(participationMapper::mapParticipationToParticipationDtoOut).toList());
-        } else if (participationUpdateDtoIn.getStatus().equals("CONFIRMED")) {
+        } else if (participationUpdateDtoIn.getStatus().equals(UpdateState.CONFIRMED)) {
             int freePlaces = event.getParticipantLimit() - number; //количесво свободных мест
             if (freePlaces >= participationUpdateDtoIn.getRequestIds().size()) { //свободных мест достаточно
-                savePart(eventId, 0, participationUpdateDtoIn.getRequestIds().size(), list, "CONFIRMED", participationUpdateDtoIn, participationUpdateDtoOut);
+                savePart(eventId, 0, participationUpdateDtoIn.getRequestIds().size(), list, PartState.CONFIRMED, participationUpdateDtoIn, participationUpdateDtoOut);
             } else {
                 int numberToApprove = participationUpdateDtoIn.getRequestIds().size() - freePlaces; //свободных мест не хватает
-                savePart(eventId, 0, numberToApprove, list, "CONFIRMED", participationUpdateDtoIn, participationUpdateDtoOut);
+                savePart(eventId, 0, numberToApprove, list, PartState.CONFIRMED, participationUpdateDtoIn, participationUpdateDtoOut);
                 List<Participation> rejectList = new ArrayList<>(List.of());
-                savePart(eventId, numberToApprove, participationUpdateDtoIn.getRequestIds().size(), rejectList, "REJECTED", participationUpdateDtoIn, participationUpdateDtoOut);
+                savePart(eventId, numberToApprove, participationUpdateDtoIn.getRequestIds().size(), rejectList, PartState.REJECTED, participationUpdateDtoIn, participationUpdateDtoOut);
             }
         }
         return participationUpdateDtoOut;
@@ -90,7 +93,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         if (event.getInitiator().equals(userId)) {
             throw new ConflictException("Инициатор события не может добавить запрос на участие в своём событии!");
         }
-        if (!event.getState().equals("PUBLISHED")) {
+        if (!event.getState().equals(EveState.PUBLISHED)) {
             throw new ConflictException("Нельзя участвовать в неопубликованном событии!");
         }
         Integer number = participationRepository.countByEvent(eventId);
@@ -101,9 +104,9 @@ public class ParticipationServiceImpl implements ParticipationService {
         participation.setEvent(eventId);
         participation.setRequester(userId);
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            participation.setStatus("CONFIRMED");
+            participation.setStatus(PartState.CONFIRMED);
         } else {
-            participation.setStatus("PENDING");
+            participation.setStatus(PartState.PENDING);
         }
         return participationMapper.mapParticipationToParticipationDtoOut(participationRepository.save(participation));
     }
@@ -115,11 +118,11 @@ public class ParticipationServiceImpl implements ParticipationService {
         if (!participation.getRequester().equals(userId)) {
             throw new ConflictException("Нельзя отменить чужой запрос на участие в событии!");
         }
-        participation.setStatus("CANCELED");
+        participation.setStatus(PartState.CANCELED);
         return participationMapper.mapParticipationToParticipationDtoOut(participationRepository.save(participation));
     }
 
-    public void savePart(Integer eventId, Integer start, Integer size, List<Participation> list, String status, ParticipationUpdateDtoIn participationUpdateDtoIn, ParticipationUpdateDtoOut participationUpdateDtoOut) {
+    public void savePart(Integer eventId, Integer start, Integer size, List<Participation> list, PartState status, ParticipationUpdateDtoIn participationUpdateDtoIn, ParticipationUpdateDtoOut participationUpdateDtoOut) {
         for (int i = start; i < size; i++) {
             Participation participation = participationRepository.findById(participationUpdateDtoIn.getRequestIds().get(i))
                     .orElseThrow(() -> new NotFoundException("Participation with id=" + eventId + " was not found"));

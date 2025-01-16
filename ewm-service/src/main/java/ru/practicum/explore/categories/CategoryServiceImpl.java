@@ -2,6 +2,8 @@ package ru.practicum.explore.categories;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDtoOut> getCategories(Integer from, Integer size) {
-        return categoryRepository.getCategories(from, size).stream().map(categoryMapper::mapCategoryToCategoryDtoOut).toList();
+        Pageable pageable = PageRequest.of(from, size);
+        return categoryRepository.findAll(pageable).stream().map(categoryMapper::mapCategoryToCategoryDtoOut).toList();
+        //return categoryRepository.getCategories(from, size).stream().map(categoryMapper::mapCategoryToCategoryDtoOut).toList();
     }
 
     @Override

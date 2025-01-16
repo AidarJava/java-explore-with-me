@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
-    @Query(value = "SELECT * FROM events AS e WHERE e.initiator = :userId OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.initiator = :userId ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEvents(@Param("userId") Integer userId, @Param("from") Integer from, @Param("size") Integer size);
 
     Optional<Event> findByIdAndInitiator(Integer eventId, Integer userId);
@@ -39,20 +39,20 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids AND e.category IN :category ORDER BY e.event_date ASC OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEventsSortDateAndCategory(@Param("ids") List<Integer> ids, @Param("category") Integer[] category, @Param("from") Integer from, @Param("size") Integer size);
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids AND e.category IN :category OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids AND e.category IN :category ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEventsSortViewsAndCategory(@Param("ids") List<Integer> ids, @Param("category") Integer[] category, @Param("from") Integer from, @Param("size") Integer size);
 
     @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids ORDER BY e.event_date ASC OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEventsSortDate(@Param("ids") List<Integer> ids, @Param("from") Integer from, @Param("size") Integer size);
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getEventsSortViews(@Param("ids") List<Integer> ids, @Param("from") Integer from, @Param("size") Integer size);
 
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart AND e.event_date < :rangeEnd OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart AND e.event_date < :rangeEnd ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getAdminEventByStartAndEnd(@Param("rangeStart") LocalDateTime rangeStart, @Param("rangeEnd") LocalDateTime rangeEnd, @Param("from") Integer from, @Param("size") Integer size);
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getAdminEventByStart(@Param("rangeStart") LocalDateTime rangeStart, @Param("from") Integer from, @Param("size") Integer size);
 
     @Query(value = "SELECT * FROM events AS e WHERE e.event_date < :rangeEnd OFFSET :from LIMIT :size", nativeQuery = true)
@@ -78,16 +78,16 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     List<Event> getAdminEventsInIdsAndStates(@Param("ids") List<Integer> ids, @Param("states") List<String> states);
 
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart AND e.event_date < :rangeEnd AND e.id IN :ids OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart AND e.event_date < :rangeEnd AND e.id IN :ids ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getAdminEventInIdsByStartAndEnd(@Param("ids") List<Integer> ids, @Param("rangeStart") LocalDateTime rangeStart, @Param("rangeEnd") LocalDateTime rangeEnd, @Param("from") Integer from, @Param("size") Integer size);
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart AND e.id IN :ids OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.event_date > :rangeStart AND e.id IN :ids ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getAdminEventInIdsByStart(@Param("ids") List<Integer> ids, @Param("rangeStart") LocalDateTime rangeStart, @Param("from") Integer from, @Param("size") Integer size);
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.event_date < :rangeEnd AND e.id IN :ids OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.event_date < :rangeEnd AND e.id IN :ids ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getAdminEventInIdsByEnd(@Param("ids") List<Integer> ids, @Param("rangeEnd") LocalDateTime rangeEnd, @Param("from") Integer from, @Param("size") Integer size);
 
-    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids OFFSET :from LIMIT :size", nativeQuery = true)
+    @Query(value = "SELECT * FROM events AS e WHERE e.id IN :ids ORDER BY e.id OFFSET :from LIMIT :size", nativeQuery = true)
     List<Event> getAdminEventInIds(@Param("ids") List<Integer> ids, @Param("from") Integer from, @Param("size") Integer size);
 
     @Query("select e from Event as e where e.id IN ?1")

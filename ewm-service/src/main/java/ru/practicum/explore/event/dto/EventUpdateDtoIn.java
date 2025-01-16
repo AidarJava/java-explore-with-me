@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
+import ru.practicum.explore.enums.StateAction;
 import ru.practicum.explore.location.model.Location;
 
 @Getter
@@ -24,7 +25,7 @@ public class EventUpdateDtoIn {
     @PositiveOrZero
     Integer participantLimit;
     Boolean requestModeration;
-    String stateAction;
+    StateAction stateAction;
     @Length(min = 3, max = 120)
     String title;
 }

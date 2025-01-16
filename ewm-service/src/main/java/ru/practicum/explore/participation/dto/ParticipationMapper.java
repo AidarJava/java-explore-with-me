@@ -15,7 +15,7 @@ public class ParticipationMapper {
         participationDtoOut.setEvent(participation.getEvent());
         participationDtoOut.setId(participation.getId());
         participationDtoOut.setRequester(participation.getRequester());
-        participationDtoOut.setStatus(participation.getStatus());
+        participationDtoOut.setStatus(participation.getStatus().toString());
         return participationDtoOut;
     }
 }
