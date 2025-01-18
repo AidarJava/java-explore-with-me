@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.dto.HitDtoIn;
 import ru.practicum.explore.dto.HitDtoOut;
 import ru.practicum.explore.dto.Stats;
+import ru.practicum.explore.hit.exceptions.BadRequestException;
 import ru.practicum.explore.mapper.HitMapper;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,9 @@ public class HitServiceImpl implements HitService {
     public List<Stats> getStats(String start, String end, String[] uris, Boolean unique) {
         LocalDateTime cleanStart = LocalDateTime.parse(start.replace("\"", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime cleanEnd = LocalDateTime.parse(end.replace("\"", ""), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        if (cleanEnd.isBefore(cleanStart)) {
+            throw new BadRequestException("Дата начала позже, чем дата конца!");
+        }
         List<Stats> stats = new ArrayList<>();
         if (uris != null) {
             List<String> cleanUris = Arrays.stream(uris).map(uri -> uri.replace("\"", "")).toList();
