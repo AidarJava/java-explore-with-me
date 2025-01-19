@@ -4,6 +4,7 @@ import ru.practicum.explore.event.dto.EventDtoIn;
 import ru.practicum.explore.event.dto.EventDtoOut;
 import ru.practicum.explore.event.dto.EventShortDtoOut;
 import ru.practicum.explore.event.dto.EventUpdateDtoIn;
+import ru.practicum.explore.event.model.Event;
 
 import java.util.List;
 
@@ -25,4 +26,6 @@ public interface EventService {
     EventDtoOut updateAdminEvent(Integer eventId, EventUpdateDtoIn eventDtoIn);
 
     List<EventShortDtoOut> getCompilationsEvents(List<Integer> eventIds);
+
+    Event getPublishEventById(Integer eventId);
 }

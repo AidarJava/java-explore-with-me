@@ -94,4 +94,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     List<Event> getCompilationsEvents(List<Integer> ids);
 
     List<Event> findAllByCategory(Integer catId);
+
+    @Query("select e from Event as e where e.id IN ?1 AND e.state = 'PUBLISHED'")
+    Optional<Event> getPublishEventById(Integer eventId);
 }
