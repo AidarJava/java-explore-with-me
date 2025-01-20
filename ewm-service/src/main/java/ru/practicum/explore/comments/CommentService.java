@@ -22,4 +22,8 @@ public interface CommentService {
 
     ResponseEntity<Void> deleteAdminComment(Integer commentId);
 
+    CommentDtoOut conformationAdminComment(Integer commentId, Boolean accept);
+
+    List<CommentDtoOut> getAdminPendingCommentsByEventId(Integer eventId);
+
 }

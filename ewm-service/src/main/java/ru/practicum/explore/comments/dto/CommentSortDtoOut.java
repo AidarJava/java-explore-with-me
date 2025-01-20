@@ -12,4 +12,5 @@ public class CommentSortDtoOut {
     String text;
     String eventAnnotation;
     String creator;
+    String status;
 }

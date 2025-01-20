@@ -412,6 +412,7 @@
 							"    pm.expect(responseJson.text).to.eql(pm.collectionVariables.get(\"commText\"));\r",
 							"    pm.expect(responseJson.eventAnnotation).to.eql(pm.collectionVariables.get(\"eventAnnotation\"));\r",
 							"    pm.expect(responseJson.creator).to.eql(pm.collectionVariables.get(\"nameUser\"));\r",
+							"    pm.expect(responseJson.status).to.eql('PENDING');\r",
 							"}); "
 						],
 						"type": "text/javascript",
@@ -474,6 +475,7 @@
 							"    pm.expect(responseJson.text).to.eql(pm.collectionVariables.get(\"commText2\")); \r",
 							"    pm.expect(responseJson.eventAnnotation).to.eql(pm.collectionVariables.get(\"eventAnnotation\")); \r",
 							"    pm.expect(responseJson.creator).to.eql(pm.collectionVariables.get(\"nameUser\")); \r",
+							"    pm.expect(responseJson.status).to.eql('PENDING');\r",
 							"}); "
 						],
 						"type": "text/javascript",
@@ -569,6 +571,55 @@
 			"response": []
 		},
 		{
+			"name": "Отклонение комментария",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function() {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.response.to.be.ok; \r",
+							"    pm.response.to.be.withBody; \r",
+							"    pm.response.to.be.json; \r",
+							"}); \r",
+							"pm.test(\"Тело ответа содержит ожидаемые поля \", function() {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.have.property('id');\r",
+							"    pm.expect(responseJson.status).to.eql('REJECTED'); \r",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/admin/comments/{{commId}}?accept=false",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"comments",
+						"{{commId}}"
+					],
+					"query": [
+						{
+							"key": "accept",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Изменение комментария пользователем",
 			"event": [
 				{
@@ -587,7 +638,8 @@
 							"    pm.expect(responseJson).to.have.property('id');\r",
 							"    pm.expect(responseJson.text).to.eql(pm.collectionVariables.get(\"cheComm\")); \r",
 							"    pm.expect(responseJson.eventAnnotation).to.eql(pm.collectionVariables.get(\"eventAnnotation\")); \r",
-							"    pm.expect(responseJson.creator).to.eql(pm.collectionVariables.get(\"nameUser\")); \r",
+							"    pm.expect(responseJson.creator).to.eql(pm.collectionVariables.get(\"nameUser\"));\r",
+							"    pm.expect(responseJson.status).to.eql('PENDING'); \r",
 							"}); "
 						],
 						"type": "text/javascript",
@@ -676,6 +728,98 @@
 						{
 							"key": "commentId",
 							"value": "{{commId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Публикация комментария",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function() {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.response.to.be.ok; \r",
+							"    pm.response.to.be.withBody; \r",
+							"    pm.response.to.be.json; \r",
+							"}); \r",
+							"pm.test(\"Тело ответа содержит ожидаемые поля \", function() {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.have.property('id');\r",
+							"    pm.expect(responseJson.status).to.eql('PUBLISHED'); \r",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/admin/comments/{{commId}}?accept=true",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"comments",
+						"{{commId}}"
+					],
+					"query": [
+						{
+							"key": "accept",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Публикация опубликованного комментария",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function() {\r",
+							"    pm.response.to.have.status(409);\r",
+							"    pm.response.to.be.withBody; \r",
+							"    pm.response.to.be.json;   \r",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/admin/comments/{{commId}}?accept=false",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"comments",
+						"{{commId}}"
+					],
+					"query": [
+						{
+							"key": "accept",
+							"value": "false"
 						}
 					]
 				}
@@ -875,10 +1019,11 @@
 							"    responseJson.forEach(item => {\r",
 							"    pm.expect(item).to.have.property('id');\r",
 							"    pm.expect(item.eventShortDtoOut.id).to.eql(parseInt(pm.collectionVariables.get(\"eventId\")));\r",
+							"    pm.expect(responseJson.status).to.eql('PUBLISHED'); \r",
 							"    });\r",
 							"pm.test(\"Массив состоит из одного элемента \", function() {\r",
 							"    var responseJson = pm.response.json();\r",
-							"    pm.expect(responseJson.length).to.equal(1);\r",
+							"    pm.expect(responseJson.length).to.equal(0);\r",
 							"    });\r",
 							"}); "
 						],
@@ -900,6 +1045,61 @@
 					"path": [
 						"admin",
 						"comments"
+					],
+					"query": [
+						{
+							"key": "eventId",
+							"value": "{{eventId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Запрос администратором всех ожидающих публикации комментариев второго события",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function() {\r",
+							"    pm.response.to.be.ok;\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"}); \r",
+							"pm.test(\"Тело ответа массив и содержит ожидаемые поля \", function() {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    responseJson.forEach(item => {\r",
+							"    pm.expect(item).to.have.property('id');\r",
+							"    pm.expect(item.eventShortDtoOut.id).to.eql(parseInt(pm.collectionVariables.get(\"eventId\")));\r",
+							"    pm.expect(item.status).to.eql('PENDING'); \r",
+							"    });\r",
+							"pm.test(\"Массив состоит из одного элемента \", function() {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.length).to.equal(1);\r",
+							"    });\r",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/admin/comments/pending?eventId={{eventId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"comments",
+						"pending"
 					],
 					"query": [
 						{

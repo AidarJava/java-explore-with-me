@@ -14,4 +14,5 @@ public class CommentDtoOut {
     EventShortDtoOut eventShortDtoOut;
     String text;
     UserShortDtoOut userShortDtoOut;
+    String status;
 }

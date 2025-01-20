@@ -31,6 +31,7 @@ public class CommentMapper {
         List<Integer> eventId = jdbcTemplate.query("SELECT ce.event_id FROM comments_events AS ce WHERE ce.comment_id = ?", (rs, rowNum) -> rs.getInt("event_id"), comment.getId());
         commentSortDtoOut.setEventAnnotation(eventService.getPublishEventById(eventId.getFirst()).getAnnotation());
         commentSortDtoOut.setText(comment.getText());
+        commentSortDtoOut.setStatus(comment.getStatus().toString());
         return commentSortDtoOut;
     }
 
@@ -41,6 +42,7 @@ public class CommentMapper {
         List<Integer> eventId = jdbcTemplate.query("SELECT ce.event_id FROM comments_events AS ce WHERE ce.comment_id = ?", (rs, rowNum) -> rs.getInt("event_id"), comment.getId());
         commentDtoOut.setEventShortDtoOut(eventMapper.mapEventToEventShortDtoOut(eventService.getPublishEventById(eventId.getFirst())));
         commentDtoOut.setText(comment.getText());
+        commentDtoOut.setStatus(comment.getStatus().toString());
         return commentDtoOut;
     }
 }

@@ -28,9 +28,22 @@ public class CommentAdminController {
         return commentService.getAdminCommentsByEventId(eventId);
     }
 
+    @GetMapping("/pending")
+    public List<CommentDtoOut> getAdminPendingCommentsByEventId(@RequestParam(name = "eventId") Integer eventId) {
+        log.info("GET/ Проверка параметров запроса метода getAdminPendingCommentsByEventId, eventId - {},", eventId);
+        return commentService.getAdminPendingCommentsByEventId(eventId);
+    }
+
     @DeleteMapping("{commentId}")
     public ResponseEntity<Void> deleteAdminComment(@PathVariable(name = "commentId") Integer commentId) {
         log.info("DELETE/ Проверка параметров запроса метода deleteAdminComment, commentId - {},", commentId);
         return commentService.deleteAdminComment(commentId);
+    }
+
+    @PatchMapping("{commentId}")
+    public CommentDtoOut conformationAdminComment(@PathVariable(name = "commentId") Integer commentId,
+                                                  @RequestParam(name = "accept") Boolean accept) {
+        log.info("PATCH/ Проверка параметров запроса метода conformationAdminComment, commentId - {}, accept - {}", commentId, accept);
+        return commentService.conformationAdminComment(commentId, accept);
     }
 }

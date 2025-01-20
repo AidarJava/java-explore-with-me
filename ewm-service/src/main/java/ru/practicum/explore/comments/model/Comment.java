@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.practicum.explore.enums.ComState;
 
 @Entity
 @Getter
@@ -20,4 +21,6 @@ public class Comment {
     String text;
     @NotNull
     Integer creator;
+    @Enumerated(EnumType.STRING)
+    ComState status;
 }
