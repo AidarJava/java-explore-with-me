@@ -9,3 +9,6 @@ ALTER TABLE participation ALTER COLUMN ID RESTART WITH 0;
 DELETE FROM compilations;
 ALTER TABLE compilations ALTER COLUMN ID RESTART WITH 0;
 DELETE FROM compilations_events;
+DELETE FROM comments;
+ALTER TABLE comments ALTER COLUMN ID RESTART WITH 0;
+DELETE FROM comments_events;
